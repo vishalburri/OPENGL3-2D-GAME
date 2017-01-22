@@ -255,8 +255,12 @@ int lmouse=0,rmouse=0;
 int leftmove=0,rightmove=0,movepan=0,moverifle=0,movebullet=0;
 float speed=1;
 double last_update=glfwGetTime();
+float u_time1[10000]={0};
+float u_time2[10000]={0};
+double utime3=0;
 
 void initvar(){
+	
 	quex.clear();
 	quey.clear();
 	quei.clear();
@@ -290,6 +294,8 @@ void initvar(){
 	flag4=0;
 	speed=1;
 	last_update=glfwGetTime();
+	u_time1[10000]={0};
+	 u_time2[10000]={0};
 
 }
 
@@ -394,37 +400,47 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 			ctrl=1;
 		if(key == GLFW_KEY_RIGHT_ALT || key == GLFW_KEY_LEFT_ALT)
 			alt=1;	
-		if(ctrl==1 && key == GLFW_KEY_LEFT){
+		if(ctrl==1 && key == GLFW_KEY_LEFT  && current_time-utime3>0.05){
 			position1-=0.2;
 			lb=-1;
+			utime3=glfwGetTime();
 		}
 
 
 
-		if(ctrl==1 && key == GLFW_KEY_RIGHT){
+		if(ctrl==1 && key == GLFW_KEY_RIGHT && current_time-utime3>0.05){
 			position1+=0.2;
 			lb=1;
+			utime3=glfwGetTime();
 		}
-		if(alt==1 && key == GLFW_KEY_LEFT){
+		if(alt==1 && key == GLFW_KEY_LEFT && current_time-utime3>0.05){
 			position2-=0.2;
 			rb=-1;
+			utime3=glfwGetTime();
 		}
-		if(alt==1 && key == GLFW_KEY_RIGHT){
+		if(alt==1 && key == GLFW_KEY_RIGHT && current_time-utime3>0.05){
 			rb=1;
 			position2+=0.2;
+			utime3=glfwGetTime();
 		}
-		if(key == GLFW_KEY_S){
+		if(key == GLFW_KEY_S && current_time-utime3>0.05){
 			position3-=0.2;
 			gg=-1;
+			utime3=glfwGetTime();
 		}
-		if(key== GLFW_KEY_F){
+		if(key== GLFW_KEY_F && current_time-utime3>0.05){
 			position3+=0.2;
 			gg=1;
+			utime3=glfwGetTime();
 		}
-		if(key==GLFW_KEY_A)
+		if(key==GLFW_KEY_A && current_time-utime3>0.05){
 			position4-=10;
-		if(key==GLFW_KEY_D)
+			utime3=glfwGetTime();
+		}
+		if(key==GLFW_KEY_D && current_time-utime3>0.05){
 			position4+=10;
+			utime3=glfwGetTime();
+		}
 		if(key==GLFW_KEY_UP)
 			mousezoom(window,0,+1);
 		if(key==GLFW_KEY_DOWN)
@@ -445,10 +461,10 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 			ypos-=0.2;
 			pan();
 		}
-		if(key==GLFW_KEY_M){
+		if(key==GLFW_KEY_M && current_time-utime3>0.05){
 			speed*=1.1;
 		}
-		if(key==GLFW_KEY_N){
+		if(key==GLFW_KEY_N && current_time-utime3>0.05){
 			speed/=1.1;
 		}
 		if(key==GLFW_KEY_ENTER && ex==1){
@@ -1210,7 +1226,12 @@ void draw ()
 				speed=1;
 			if(speed>3)
 				speed=3;
+			float c_time2=glfwGetTime();
+
+			if(c_time2-u_time2[i]>0.005){
 			pos[i]-=(0.02*speed);
+			u_time2[i]=glfwGetTime();
+		}
 			//if(pos[i]==-5.5 && random2[i]==0)
 			//printf("%f\n",pos[i]);
 			//if(4+pos[i] == -2) {
@@ -1292,7 +1313,12 @@ void draw ()
 
 		if(flag3==1){
 			for(int i=0;i<=press;i++){
+				float c_time1=glfwGetTime();
+				
+				if(c_time1-u_time1[i] > 0.005){				
 				position5[i]+=0.2;
+				u_time1[i]=glfwGetTime();
+			}
 
 				laserx[i]=xcollide[i]+position5[i]*cos(position6[i]*M_PI/180.0f);
 				lasery[i]=(ycollide[i]+position7[i])+position5[i]*sin(position6[i]*M_PI/180.0f);
