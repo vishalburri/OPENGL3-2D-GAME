@@ -258,7 +258,7 @@ double last_update=glfwGetTime();
 float u_time1[10000]={0};
 float u_time2[10000]={0};
 double utime3=0;
-
+int flagp=0;
 void initvar(){
 	
 	quex.clear();
@@ -277,6 +277,8 @@ void initvar(){
 		vis[i]=0;
 		xcollide[i]=0;
 		ycollide[i]=0;
+		u_time1[i]=0;
+		u_time2[i]=0;
 	}
 	xpos=0;
 	ypos=0;
@@ -294,8 +296,7 @@ void initvar(){
 	flag4=0;
 	speed=1;
 	last_update=glfwGetTime();
-	u_time1[10000]={0};
-	 u_time2[10000]={0};
+	flagp=0;
 
 }
 
@@ -532,7 +533,14 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
 
 		}
 		else if(ex==0){
-			if((lx < (-3.15+position1)*94+50+94*8) && ((-3.15+position1)*94-25+94*8) <lx && ly>600){
+
+			if(lx<1050 && lx>1020 && ly>20 && ly<50){
+				if(flagp==0)
+				flagp=1;
+				else
+					flagp=0;
+			}
+			else if((lx < (-3.15+position1)*94+50+94*8) && ((-3.15+position1)*94-25+94*8) <lx && ly>600){
 				leftmove=1;
 				rightmove=0;
 				moverifle=0;
@@ -614,7 +622,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	Matrices.projection = glm::ortho(-8.0f, 8.0f, -4.0f, 4.0f, 0.1f, 500.0f);
 }
 
-VAO *triangle, *rectangle,*tri, *circle, *circle1,*circle41,*restart, *rectangle1,*rectang,*laser[10000],*level[7],*segment[7],*scoredis[7], *circle2, *circle3, *rectangle2, *rectangle3, *rectangle4, *rectangle5, *rectangle6, *rectangle7, *circle4, *circle5, *line, *line1, *rect[10000],*rectan;
+VAO *triangle, *rectangle,*tri,*play, *circle,*pause1,*pause2, *circle1,*circle41,*restart,*pause, *rectangle1,*rectang,*laser[10000],*level[7],*segment[7],*scoredis[7], *circle2, *circle3, *rectangle2, *rectangle3, *rectangle4, *rectangle5, *rectangle6, *rectangle7, *circle4, *circle5, *line, *line1, *rect[10000],*rectan;
 
 // Creates the triangle object used in this sample code
 void createTriangle ()
@@ -643,8 +651,18 @@ void createTriangle ()
 		-0.3,0.2,0, // vertex 1
 		-0.3,-0.2,0, // vertex 2
 	};
+	static const GLfloat playvertex [] = {
+		0, 0,0, // vertex 0
+		-0.2,0.1,0, // vertex 1
+		-0.2,-0.1,0, // vertex 2
+	};
 
 	static const GLfloat color_buffer [] = {
+		1,1,1, // color 0
+		1,1,1, // color 1
+		1,1,1, // color 2
+	};
+	static const GLfloat playcolor [] = {
 		1,1,1, // color 0
 		1,1,1, // color 1
 		1,1,1, // color 2
@@ -654,6 +672,8 @@ void createTriangle ()
 	line = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data, color_buffer_data, GL_LINE);
 	line1 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data1, color_buffer_data, GL_LINE);
 	tri = create3DObject(GL_TRIANGLES, 3, vertex_buffer, color_buffer, GL_FILL);
+	play = create3DObject(GL_TRIANGLES, 3, playvertex, playcolor, GL_FILL);
+
 
 
 }
@@ -717,6 +737,15 @@ void createRectangle ()
 		0,0,0  // vertex 1
 	};
 	GLfloat display [] = {
+		0,0,0, // vertex 1
+		0.2,0,0, // vertex 2
+		0.2, 0.05,0, // vertex 3
+
+		0.2, 0.05,0, // vertex 3
+		0, 0.05,0, // vertex 4
+		0,0,0 
+	};
+	GLfloat pausesymbol [] = {
 		0,0,0, // vertex 1
 		0.2,0,0, // vertex 2
 		0.2, 0.05,0, // vertex 3
@@ -797,6 +826,16 @@ void createRectangle ()
 		0,0,1
 			// color 1
 	};
+	GLfloat colorpause [] = {
+		1,1,1,
+		1,1,1,
+		1,1,1,
+		1,1,1,
+		1,1,1,
+		1,1,1
+			// color 1
+	};
+	
 
 	// create3DObject creates and returns a handle to a VAO that can be used later
 	rectangle = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color_buffer_data, GL_FILL);
@@ -805,6 +844,8 @@ void createRectangle ()
 	rectangle1 = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color_buffer_data1, GL_FILL);
 	rectang = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color_buffer1, GL_FILL);
 	restart = create3DObject(GL_TRIANGLES, 6, vertexrestart, color_buffer_data1, GL_FILL);
+	pause1 =  create3DObject(GL_TRIANGLES, 6,pausesymbol, colorpause, GL_FILL);
+	pause2 =  create3DObject(GL_TRIANGLES, 6, pausesymbol, colorpause, GL_FILL);
 
 	rectangle2 = create3DObject(GL_TRIANGLES, 6, gundata, colorgundata, GL_FILL);
 	rectangle3 = create3DObject(GL_TRIANGLES, 6, rectanglegundata, colorgundata, GL_FILL);
@@ -831,6 +872,8 @@ void createCircle()
 	GLfloat vertex_buffer_data [360*9]={0};
 	GLfloat vertex_buffer_data1 [360*9]={0};
 	GLfloat vertex_buffer_data2 [360*9]={0};
+	GLfloat vertex_buffer_data3 [360*9]={0};
+
 
 	for(int i=0;i<360;i++)
 	{
@@ -868,6 +911,18 @@ void createCircle()
 		vertex_buffer_data2[9*i+7]=0.35*sin((i+1)*M_PI/180);
 		vertex_buffer_data2[9*i+8]=0;
 	}
+	for(int i=0;i<360;i++)
+	{
+		vertex_buffer_data3[9*i]=0;
+		vertex_buffer_data3[9*i+1]=0;
+		vertex_buffer_data3[9*i+2]=0;
+		vertex_buffer_data3[9*i+3]=0.25*cos(i*M_PI/180);
+		vertex_buffer_data3[9*i+4]=0.25*sin(i*M_PI/180);
+		vertex_buffer_data3[9*i+5]=0;
+		vertex_buffer_data3[9*i+6]=0.25*cos((i+1)*M_PI/180);
+		vertex_buffer_data3[9*i+7]=0.25*sin((i+1)*M_PI/180);
+		vertex_buffer_data3[9*i+8]=0;
+	}
 	GLfloat color_buffer_data [360*9];
 	GLfloat color_buffer_data1 [360*9];
 	GLfloat color_buffer_data2 [360*9];
@@ -875,6 +930,7 @@ void createCircle()
 
 	GLfloat color_buffer_data3 [360*9];
 
+	static GLfloat color_buffer_data4 [360*9];
 
 
 
@@ -916,6 +972,8 @@ void createCircle()
 	circle41 = create3DObject(GL_TRIANGLES,360*3,vertex_buffer_data1,color_buffer2,GL_LINE);
 
 	circle5 = create3DObject(GL_TRIANGLES,360*3,vertex_buffer_data2,color_buffer_data3,GL_LINE);
+	pause = create3DObject(GL_TRIANGLES,360*3,vertex_buffer_data3,color_buffer_data4,GL_FILL);
+
 
 
 }
@@ -1095,6 +1153,44 @@ void draw ()
 
 	}
 	if(ex==0){
+if(flagp==1){
+		Matrices.model = glm::mat4(1.0f);
+
+		glm::mat4 translateRectangle114 = glm::translate (glm::vec3(3.12, 3.7, 0));        // glTranslatef
+		glm::mat4 rotateRectangle114 = glm::rotate((float)(0*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
+		Matrices.model *= (translateRectangle114 * rotateRectangle114);
+		MVP = VP * Matrices.model;
+		glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		draw3DObject(play);
+}
+if(flagp==0){
+Matrices.model = glm::mat4(1.0f);
+
+		glm::mat4 translateRectangle113 = glm::translate (glm::vec3(2.95, 3.6, 0));        // glTranslatef
+		glm::mat4 rotateRectangle113 = glm::rotate((float)(90*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
+		Matrices.model *= (translateRectangle113 * rotateRectangle113);
+		MVP = VP * Matrices.model;
+		glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		draw3DObject(pause1);
+
+		Matrices.model = glm::mat4(1.0f);
+
+		glm::mat4 translateRectangle114 = glm::translate (glm::vec3(3.1, 3.6, 0));        // glTranslatef
+		glm::mat4 rotateRectangle114 = glm::rotate((float)(90*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
+		Matrices.model *= (translateRectangle114 * rotateRectangle114);
+		MVP = VP * Matrices.model;
+		glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		draw3DObject(pause2);
+}
+		Matrices.model = glm::mat4(1.0f);
+
+		glm::mat4 translateRectangle112 = glm::translate (glm::vec3(3, 3.7, 0));        // glTranslatef
+		glm::mat4 rotateRectangle112 = glm::rotate((float)(0*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
+		Matrices.model *= (translateRectangle112 * rotateRectangle112);
+		MVP = VP * Matrices.model;
+		glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		draw3DObject(pause);
+
 		if(leftmove!=1){
 			Matrices.model = glm::mat4(1.0f);
 
@@ -1228,7 +1324,7 @@ void draw ()
 				speed=3;
 			float c_time2=glfwGetTime();
 
-			if(c_time2-u_time2[i]>0.005){
+			if(c_time2-u_time2[i]>0.005 && !flagp){
 			pos[i]-=(0.02*speed);
 			u_time2[i]=glfwGetTime();
 		}
@@ -1315,7 +1411,7 @@ void draw ()
 			for(int i=0;i<=press;i++){
 				float c_time1=glfwGetTime();
 				
-				if(c_time1-u_time1[i] > 0.005){				
+				if(c_time1-u_time1[i] > 0.005 && !flagp){				
 				position5[i]+=0.2;
 				u_time1[i]=glfwGetTime();
 			}
@@ -1910,7 +2006,7 @@ void draw ()
 				if(lmouse==1 || rmouse==1)
 					drag(window);
 			}
-			if ((current_time - last_update_time) >= 1.6/speed) { // atleast 0.5s elapsed since last frame
+			if ((current_time - last_update_time) >= 1.6/speed && !flagp) { // atleast 0.5s elapsed since last frame
 				// do something every 0.5 seconds ..
 				last_update_time = current_time;
 				flag=1;
